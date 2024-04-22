@@ -1,0 +1,31 @@
+import requests
+import logging
+import re
+
+def sensitive_data_exposure_scan(url, username=None, password=None):
+    try:
+        response = requests.get(url, auth=(username, password))
+        response.raise_for_status()
+        sensitive_patterns = [
+            r"password",             # Check for the word "password"
+            r"api[_-]?key",          # Check for variations of "api_key" or "api-key"
+            r"secret",               # Check for the word "secret"
+            r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"  # Check for email addresses
+        ]
+        for pattern in sensitive_patterns:
+            matches = re.findall(pattern, response.text, re.IGNORECASE)
+            if matches:
+                logging.warning(f"[Sensitive Data Exposure] Potential sensitive data exposed at {url}: {matches}")
+                return True
+        logging.info("[Sensitive Data Exposure] No sensitive data exposure detected.")
+        return False
+    except requests.exceptions.RequestException as e:
+        logging.error("[Sensitive Data Exposure] Error occurred during sensitive data exposure check: " + str(e))
+        return False
+
+# Example usage:
+if __name__ == "__main__":
+    target_url = input('Enter your target URL: ')
+    username = input('Enter your username (if required): ')
+    password = input('Enter your password (if required): ')
+    sensitive_data_exposure_scan(target_url, username, password)
