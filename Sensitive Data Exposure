@@ -11,6 +11,8 @@ def sensitive_data_exposure_scan(url, username=None, password=None):
             r"api[_-]?key",          # Check for variations of "api_key" or "api-key"
             r"secret",               # Check for the word "secret"
             r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"  # Check for email addresses
+            r"credit card",          # Example: Check for mentions of "credit card"
+            r"ssn"                   # Example: Check for mentions of "ssn" (Social Security Number)
         ]
         for pattern in sensitive_patterns:
             matches = re.findall(pattern, response.text, re.IGNORECASE)
